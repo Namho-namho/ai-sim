@@ -1,5 +1,7 @@
 # AI 학습 시뮬레이션 사이트
 
+🌐 **배포 사이트: https://namho-namho.github.io/ai-sim/** (`main` 푸시 시 자동 배포)
+
 **직접 값을 바꿔보고 결과가 어떻게 달라지는지 눈으로 확인하며** AI 개념을 배우는
 정적 웹사이트입니다. 설명을 읽기만 하는 대신, 슬라이더를 움직이고 학습이 돌아가는 과정을
 관찰하면서 머신러닝 · 딥러닝 · 강화학습의 핵심 개념을 익힙니다.
@@ -38,6 +40,15 @@
 - npm (Node.js에 포함)
 - 별도 서버·DB·환경변수 없음. 클론 후 아래 명령만 실행하면 됩니다.
 
+### 클론 후 실행 (처음 받는 팀원용)
+
+```bash
+git clone https://github.com/Namho-namho/ai-sim.git
+cd ai-sim
+npm install
+npm run dev      # http://localhost:5173 접속
+```
+
 ### 설치
 
 ```bash
@@ -59,23 +70,32 @@ npm run build      # dist/ 에 정적 파일 생성
 npm run preview    # 빌드 결과를 로컬에서 미리보기
 ```
 
-### 배포
+### 배포 (자동)
 
-`dist/` 폴더 전체가 결과물입니다. 서버가 필요 없으므로 **Netlify · Vercel · GitHub Pages**
-등 어떤 정적 호스팅에도 `dist/`를 올리면 됩니다.
+이 저장소는 **`main` 브랜치에 푸시(또는 PR 병합)되면 GitHub Actions가 자동으로 빌드해
+GitHub Pages에 배포**합니다. 별도로 손댈 것이 없습니다.
 
-- GitHub Pages처럼 **하위 경로**(`https://아이디.github.io/저장소이름/`)로 배포할 때는
-  [vite.config.js](vite.config.js)의 `base` 값을 `"/저장소이름/"`으로 바꾼 뒤 다시 빌드하세요.
-- 라우팅은 해시 방식(`#/module/ml-basics`)이라 새로고침해도 404가 나지 않습니다.
+- 배포 주소: **https://namho-namho.github.io/ai-sim/**
+- 워크플로: [.github/workflows/deploy.yml](.github/workflows/deploy.yml) — 진행 상황은 저장소 **Actions** 탭에서 확인
+- Pages는 하위 경로(`/ai-sim/`)로 서비스되므로 [vite.config.js](vite.config.js)에서
+  **빌드 시에만** `base`를 `"/ai-sim/"`로 설정합니다. 로컬 `npm run dev`(`/`)에는 영향이 없습니다.
+- 라우팅이 해시 방식(`#/module/ml-basics`)이라 배포 후 새로고침해도 404가 나지 않습니다.
+- 저장소 이름을 바꾸면 `vite.config.js`의 `"/ai-sim/"`만 새 이름으로 고치면 됩니다.
+
+> 다른 호스팅(Netlify·Vercel 등)에 올릴 때는 `npm run build` 결과인 `dist/` 폴더 전체를 그대로 배포하면 됩니다.
 
 ## 폴더 구조
 
 ```
 ai-sim/
   index.html                진입 HTML. #root 에 앱을 마운트하고 src/main.jsx 로드
-  vite.config.js            Vite 설정 (React 플러그인, 배포용 base 경로)
+  vite.config.js            Vite 설정 (React 플러그인, 배포 시 base=/ai-sim/)
   package.json              스크립트(dev/build/preview)와 의존성
   CLAUDE.md                 설계 원칙 · 제약 (작업 전 필독)
+  CONTRIBUTING.md           협업 규칙 (커밋 컨벤션 · 브랜치 전략 · PR 절차)
+  .github/
+    workflows/deploy.yml    main 푸시 시 빌드 → GitHub Pages 자동 배포
+    pull_request_template.md PR 작성 템플릿 (체크리스트 포함)
   src/
     main.jsx                React 진입점. App 을 StrictMode 로 렌더
     App.jsx                 홈 화면(모듈 목록) + 해시 라우팅 분기
@@ -150,6 +170,33 @@ export const MODULES = [
 `npm run dev` 상태에서 홈 카드가 활성화되고, 카드를 누르면 `#/module/<id>` 로 이동해
 컴포넌트가 뜨는지 확인합니다. (홈 카드·라우팅·"모듈 목록" 뒤로가기 버튼은 모두
 레지스트리 기반으로 자동 처리됩니다.)
+
+## 협업 방식 (브랜치 · PR · 커밋)
+
+전체 규칙은 [CONTRIBUTING.md](CONTRIBUTING.md)에 있습니다. 핵심만 요약하면:
+
+- **브랜치 전략**: `main` + feature 브랜치 + PR. `main`에는 직접 커밋하지 말고 항상 PR로 병합합니다.
+  브랜치 이름은 커밋 타입을 접두사로: `feat/…`, `fix/…`, `docs/…`
+
+  ```bash
+  git switch main && git pull
+  git switch -c feat/my-feature      # 새 작업 브랜치
+  # ...작업 & 커밋...
+  git push -u origin feat/my-feature
+  gh pr create                        # 또는 GitHub 웹에서 PR 생성
+  ```
+
+- **PR 절차**: PR을 열면 [PR 템플릿](.github/pull_request_template.md)이 자동으로 뜹니다.
+  체크리스트(빌드 통과·모바일 레이아웃·새 모듈 등록 등)를 채우고, 팀원 1명 이상 리뷰 후
+  **Squash and merge**로 병합합니다. `main`에 병합되면 자동 배포됩니다.
+
+- **커밋 메시지**: `<타입>: <영어 요약>` 형식. 타입은 `feat` / `fix` / `docs` / `style` / `refactor` / `chore`.
+
+  ```
+  feat: add reinforcement learning module
+  fix: correct loss curve scaling on retina screens
+  docs: update deployment steps in README
+  ```
 
 ## 기여 규칙
 
